@@ -1,10 +1,16 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" href="button.css">
   </head>
   <body>
-    <button id="changeColor"></button>
+    <form class="form" id="form">
+      <h1>Invite link</h1>
+      <label>
+        <span>Your ID</span>
+        <input type="text" id="userId" placeholder="some-string"/>
+      </label>
+      <input type="submit" id="copy" class="copy" value="Copy link" />
+    </form>
     <script src="popup.js"></script>
   </body>
 </html>
