@@ -1,12 +1,12 @@
 {
-  "name": "Getting Started Example",
-  "description": "Build an Extension!",
+  "name": "Plz.party",
+  "description": "Pair up for code reviews!",
   "version": "1.0",
   "manifest_version": 3,
   "background": {
     "service_worker": "main.js"
   },
-  "permissions": ["storage", "activeTab", "scripting"],
+  "permissions": ["storage", "activeTab", "scripting", "clipboardWrite"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {

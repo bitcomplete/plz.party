@@ -1,22 +1,36 @@
-const copyEl = document.getElementById('copy');
+let pageLocation;
+
+function getPageLocation() {
+  return {search: window.location.search, pathname: window.location.pathname, origin: window.location.origin};
+}
+
+const userIdEl = document.getElementById('userId');
 
 (async function asyncFunction() {
-  let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  chrome.scripting.executeScript({
-    target: { tabId: tab.id },
-    function: copyId,
-  });
+    let [tab] = await chrome.tabs.query({active: true, currentWindow: true});
+    userIdEl.addEventListener('keypress', function listener(e) {
+      chrome.scripting.executeScript({
+        target: {tabId: tab.id},
+        function: getPageLocation,
+      }, (injectionResults) => {
+        pageLocation = injectionResults[0].result;
+      });
+    });
 
-  // The body of this function will be executed as a content script inside the
-  // current page
-  function copyId() {
-    copyEl.addEventListener('click', function listener(e) {
+    document.getElementById('form').addEventListener('submit', (e) => {
       e.preventDefault();
-      const params = new URLSearchParams(window.location.search);
-      params.set('userId', document.getElementById("userId").value);
-      const inviteUrl = `${window.location.origin}${params.toString()}`;
-      window.alert({inviteUrl});
-      console.log({inviteUrl});
+      if (!userIdEl.value || !pageLocation) {
+        return;
+      }
+
+      const params = new URLSearchParams(pageLocation.search);
+      params.set('userId', userIdEl.value);
+      const inviteUrl = `${pageLocation.origin}${pageLocation.pathname}?${params.toString()}`;
+
+      const type = "text/plain";
+      const blob = new Blob([inviteUrl], { type });
+      const data = [new ClipboardItem({ [type]: blob })];
+      navigator.clipboard.write(data);
     })
   }
-})();
+)();
