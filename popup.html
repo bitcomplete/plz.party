@@ -11,17 +11,78 @@
         padding: 4px;
         margin-top: .5rem;
       }
+
+      .sessionForm {
+        display: flex;
+        align-items: center;
+      }
+
+      .toggleInput {
+        height: 0;
+        width: 0;
+        visibility: hidden;
+      }
+
+      .toggleVisual {
+        cursor: pointer;
+        text-indent: -9999px;
+        width: 32px;
+        height: 16px;
+        background: grey;
+        display: inline-block;
+        border-radius: 16px;
+        position: relative;
+      }
+
+      .toggleVisual:after {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 12px;
+        height: 12px;
+        background: #fff;
+        border-radius: 12px;
+      }
+
+      .toggleInput:checked + .toggleVisual {
+        background: #5dac26;
+      }
+
+      .toggleInput:checked + .toggleVisual:after {
+        left: calc(100% - 2px);
+        transform: translateX(-100%);
+      }
+
+      .toggleText {
+        display: inline-block;
+        margin-left: 2px;
+      }
+
+      hr {
+        margin: 1rem 0;
+      }
+
     </style>
   </head>
   <body>
     <form class="form" id="form">
-      <h1>Invite link</h1>
+      <h1>Plz party!</h1>
       <label>
-        <span>Your ID</span>
-        <input autofocus type="text" id="userId" placeholder="some-string"/>
+        <span>Your party session ID:</span>
+        <input autofocus type="text" id="userId" placeholder="some-string" spellcheck="false" />
       </label>
-      <input type="submit" id="copy" class="copy" value="Copy link" />
+      <input type="submit" id="copy" class="copy" value="Copy session link" />
     </form>
+
+    <hr />
+
+    <form class="form sessionForm" id="sessionStart">
+      <input class="toggleInput" type="checkbox" id="session" />
+      <label class="toggleVisual" for="session"></label>
+      <label class="toggleText" for="session" id="toggleLabel">Party active</label>
+    </form>
+
     <script src="popup.js"></script>
   </body>
 </html>
