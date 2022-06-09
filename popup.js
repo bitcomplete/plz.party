@@ -1,3 +1,5 @@
+const PARAM_NAME = 'plz-party-user-id';
+
 let pageLocation;
 
 function getPageLocation() {
@@ -24,7 +26,7 @@ const userIdEl = document.getElementById('userId');
       }
 
       const params = new URLSearchParams(pageLocation.search);
-      params.set('userId', userIdEl.value);
+      params.set(PARAM_NAME, userIdEl.value);
       const inviteUrl = `${pageLocation.origin}${pageLocation.pathname}?${params.toString()}`;
 
       const type = "text/plain";
