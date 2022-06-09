@@ -6,6 +6,13 @@
   "background": {
     "service_worker": "main.js"
   },
+  "content_scripts": [
+    {
+      "matches": ["https://www.plz.review/*"],
+      "css": [],
+      "js": ["peer.min.js", "connection.js", "content-script.js"]
+    }
+  ],
   "permissions": ["storage", "activeTab", "scripting", "clipboardWrite"],
   "action": {
     "default_popup": "popup.html",
