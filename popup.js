@@ -27,8 +27,11 @@ userIdEl.value = makeId();
 
 const sessionEl = document.getElementById('session');
 sessionEl.addEventListener('click', (e) => {
-  // TODO: use this signal to start a new session or cancel it
   sessionIsActive = e.target.checked;
+
+  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+    chrome.tabs.sendMessage(tabs[0].id, {sessionIsActive});
+  });
 });
 
 (async function asyncFunction() {

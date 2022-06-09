@@ -1,6 +1,14 @@
 (function () {
   console.log("in connection js")
 
+  // Listens for changes to the "Party active" toggle in the extension popup
+  chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+      // TODO: use request.sessionIsActive to start/cancel a session
+      console.log({sessionIsActive: request.sessionIsActive});
+    }
+  );
+
   var lastPeerId = null;
   var peer = null;
   var conn = null;
@@ -59,18 +67,5 @@
           conn = null;
       });
   }
-
-  // Send message
-  sendButton.addEventListener('click', function () {
-      if (conn && conn.open) {
-          var msg = sendMessageBox.value;
-          sendMessageBox.value = "";
-          conn.send(msg);
-          console.log("Sent: " + msg)
-      } else {
-          console.log('Connection is closed');
-      }
-  });
-
   initialize();
 })();
