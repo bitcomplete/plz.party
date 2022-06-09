@@ -33,14 +33,17 @@ sessionEl.addEventListener('click', (e) => {
 
 (async function asyncFunction() {
     let [tab] = await chrome.tabs.query({active: true, currentWindow: true});
-    userIdEl.addEventListener('keypress', function listener(e) {
+    function updatePageLocation(e) {
       chrome.scripting.executeScript({
         target: {tabId: tab.id},
         function: getPageLocation,
       }, (injectionResults) => {
         pageLocation = injectionResults[0].result;
       });
-    });
+    }
+
+    userIdEl.addEventListener('focus', updatePageLocation);
+    userIdEl.addEventListener('keypress', updatePageLocation);
 
     document.getElementById('form').addEventListener('submit', (e) => {
       e.preventDefault();
