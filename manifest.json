@@ -10,7 +10,7 @@
     {
       "matches": ["https://www.plz.review/*"],
       "css": [],
-      "js": ["peer.min.js", "connection.js"]
+      "js": ["peer.min.js", "connection.js", "cursor.js"]
     }
   ],
   "permissions": ["storage", "activeTab", "scripting", "clipboardWrite"],
