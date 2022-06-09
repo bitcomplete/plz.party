@@ -1,1 +1,0 @@
-window.alert('This is content-script.js running');
