@@ -1,56 +1,59 @@
 (function () {
   console.log("in connection js")
 
-  // Listens for changes to the "Party active" toggle in the extension popup
-  chrome.runtime.onMessage.addListener(
-    function(request, sender, sendResponse) {
-      // TODO: use request.sessionIsActive to start/cancel a session
-      console.log({sessionIsActive: request.sessionIsActive});
-    }
-  );
-
   var lastPeerId = null;
   var peer = null;
   var conn = null;
   var sendButton = document.getElementById("sendButton");
 
-  /**
-   * Create the Peer object for our end of the connection.
-   *
-   * Sets up callbacks that handle any events related to our
-   * peer object.
-   */
-   function initialize() {
+  // Listens for changes to the "Party active" toggle in the extension popup
+  chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+      // TODO: use request.sessionIsActive to start/cancel a session
+      console.log("recieved message from popup: ", request);
       // Create own peer object with connection to shared PeerJS server
       peer = new Peer(null, {
           debug: 2
+      });      
+
+      console.log('ID: ' + peer.id);
+      chrome.runtime.sendMessage({peerId: peer.id}, function(response) {
+        console.log("Popup received id: ", response);
       });
+      console.log("Awaiting connection")
+      
+      sendResponse({peerId: peer.id});
+      initialize(peer);
+    }
+  );
 
-      peer.on('open', function (id) {
-          // Workaround for peer.reconnect deleting previous id
-          if (peer.id === null) {
-              console.log('Received null id from peer open');
-              peer.id = lastPeerId;
-          } else {
-              lastPeerId = peer.id;
-          }
+  /**
+   * Sets up callbacks that handle any events related to our
+   * peer object.
+   */
+   function initialize(peer) {
+    peer.on('open', function (id) {
+      // Workaround for peer.reconnect deleting previous id
+      if (peer.id === null) {
+          console.log('Received null id from peer open');
+          peer.id = lastPeerId;
+      } else {
+          lastPeerId = peer.id;
+      }
+    });
+    peer.on('connection', function (c) {
+        // Allow only a single connection
+        if (conn && conn.open) {
+            c.on('open', function() {
+                c.send("Already connected to another client");
+                setTimeout(function() { c.close(); }, 500);
+            });
+            return;
+        }
 
-          console.log('ID: ' + peer.id);
-          console.log("Awaiting connection")
-      });
-      peer.on('connection', function (c) {
-          // Allow only a single connection
-          if (conn && conn.open) {
-              c.on('open', function() {
-                  c.send("Already connected to another client");
-                  setTimeout(function() { c.close(); }, 500);
-              });
-              return;
-          }
-
-          conn = c;
-          console.log("Connected to: " + conn.peer);
-          ready();
+        conn = c;
+        console.log("Connected to: " + conn.peer);
+        ready();
       });
       peer.on('error', function (err) {
           console.log(err);
@@ -67,5 +70,4 @@
           conn = null;
       });
   }
-  initialize();
 })();
