@@ -1,26 +1,7 @@
 const PARAM_NAME = 'plz-party-user-id';
 let pageLocation;
-
 let sessionIsActive = false;
-
-function getPageLocation() {
-  return {search: window.location.search, pathname: window.location.pathname, origin: window.location.origin};
-}
-
-function makeId() {
-  const length = 8;
-  let result = '';
-  const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  const charactersLength = characters.length;
-  for ( let i = 0; i < length; i++ ) {
-    result += characters.charAt(Math.floor(Math.random() *
-      charactersLength));
-    if (i === 3) {
-      result += '-';
-    }
-  }
-  return result;
-}
+let peerId = null;
 
 const userIdEl = document.getElementById('userId');
 userIdEl.value = makeId();
@@ -30,23 +11,23 @@ sessionEl.addEventListener('click', (e) => {
   sessionIsActive = e.target.checked;
 
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    chrome.tabs.sendMessage(tabs[0].id, {sessionIsActive});
+    chrome.tabs.sendMessage(tabs[0].id, {sessionIsActive}, function(response) {
+      console.log('Received response:', response);
+      peerId = response.peerId;
+    });
   });
 });
 
 (async function asyncFunction() {
     let [tab] = await chrome.tabs.query({active: true, currentWindow: true});
-    function updatePageLocation(e) {
-      chrome.scripting.executeScript({
-        target: {tabId: tab.id},
-        function: getPageLocation,
-      }, (injectionResults) => {
-        pageLocation = injectionResults[0].result;
-      });
-    }
 
-    userIdEl.addEventListener('focus', updatePageLocation);
-    userIdEl.addEventListener('keypress', updatePageLocation);
+    // Ask the page for its location:
+    chrome.scripting.executeScript({
+      target: {tabId: tab.id},
+      function: () => ({search: window.location.search, pathname: window.location.pathname, origin: window.location.origin}),
+    }, (injectionResults) => {
+      pageLocation = injectionResults[0].result;
+    });
 
     document.getElementById('form').addEventListener('submit', (e) => {
       e.preventDefault();
@@ -55,7 +36,7 @@ sessionEl.addEventListener('click', (e) => {
       }
 
       const params = new URLSearchParams(pageLocation.search);
-      params.set(PARAM_NAME, userIdEl.value);
+      params.set(PARAM_NAME, peerId);
       const inviteUrl = `${pageLocation.origin}${pageLocation.pathname}?${params.toString()}`;
 
       const type = "text/plain";
