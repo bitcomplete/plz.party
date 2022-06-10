@@ -4,7 +4,6 @@
   var lastPeerId = null;
   var peer = null;
   var conn = null;
-  var sendButton = document.getElementById("sendButton");
 
   // Listens for changes to the "Party active" toggle in the extension popup
   chrome.runtime.onMessage.addListener(
@@ -14,16 +13,12 @@
       // Create own peer object with connection to shared PeerJS server
       peer = new Peer(null, {
           debug: 2
-      });      
-
-      console.log('ID: ' + peer.id);
-      chrome.runtime.sendMessage({peerId: peer.id}, function(response) {
-        console.log("Popup received id: ", response);
       });
-      console.log("Awaiting connection")
-      
-      sendResponse({peerId: peer.id});
       initialize(peer);
+
+      console.log("Awaiting connection")
+
+      sendResponse({peerId: peer._id});
     }
   );
 
@@ -40,6 +35,9 @@
       } else {
           lastPeerId = peer.id;
       }
+
+      console.log('open', peer.id);
+      chrome.runtime.sendMessage({peerId: peer.id});
     });
     peer.on('connection', function (c) {
         // Allow only a single connection

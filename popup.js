@@ -3,15 +3,17 @@ let pageLocation;
 let sessionIsActive = false;
 let peerId = null;
 
+chrome.runtime.onMessage.addListener((response) => {
+  console.log('Received response:', response);
+  peerId = response.peerId;
+});
+
 const sessionEl = document.getElementById('session');
 sessionEl.addEventListener('click', (e) => {
   sessionIsActive = e.target.checked;
 
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    chrome.tabs.sendMessage(tabs[0].id, {sessionIsActive}, function(response) {
-      console.log('Received response:', response);
-      peerId = response.peerId;
-    });
+    chrome.tabs.sendMessage(tabs[0].id, {sessionIsActive});
   });
 });
 
@@ -28,7 +30,7 @@ sessionEl.addEventListener('click', (e) => {
 
     document.getElementById('form').addEventListener('submit', (e) => {
       e.preventDefault();
-      if (!userIdEl.value || !pageLocation) {
+      if (!pageLocation) {
         return;
       }
 
