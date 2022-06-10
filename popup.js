@@ -3,9 +3,6 @@ let pageLocation;
 let sessionIsActive = false;
 let peerId = null;
 
-const userIdEl = document.getElementById('userId');
-userIdEl.value = makeId();
-
 const sessionEl = document.getElementById('session');
 sessionEl.addEventListener('click', (e) => {
   sessionIsActive = e.target.checked;
