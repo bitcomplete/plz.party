@@ -3,10 +3,11 @@ let pageLocation;
 let sessionIsActive = false;
 let peerId = null;
 
-chrome.runtime.onMessage.addListener((response) => {
-  console.log('Received response:', response);
-  peerId = response.peerId;
-});
+chrome.runtime.onMessage.addListener(
+  function(request, sender, sendResponse) {
+    console.log('message received', {request, sender});
+  }
+);
 
 const sessionEl = document.getElementById('session');
 sessionEl.addEventListener('click', (e) => {

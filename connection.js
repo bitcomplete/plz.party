@@ -1,24 +1,37 @@
 (function () {
-  console.log("in connection js")
+  const PARAM_NAME = 'plz-party-user-id';
 
-  var lastPeerId = null;
-  var peer = null;
-  var conn = null;
+  // ==========================================================================
+  // GUEST CODE
+  // ==========================================================================
+  const searchParams = new URL(window.location.href).searchParams;
+  if (searchParams.has(PARAM_NAME)) {
+    // We have the param in the url: this is a guest trying to connect
+    const sessionId = searchParams.get(PARAM_NAME);
+    const peer = new Peer();
+    const connection = peer.connect(sessionId);
+    console.log('Guest event - connection', {'DataConnection': connection, sessionId} );
+  }
+
+  let lastPeerId = null;
+  let peer = null;
+  let conn = null;
+
+  // ==========================================================================
+  // HOST CODE
+  // ==========================================================================
 
   // Listens for changes to the "Party active" toggle in the extension popup
   chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
-      // TODO: use request.sessionIsActive to start/cancel a session
-      console.log("recieved message from popup: ", request);
+      console.log("Received message from popup: ", request);
       // Create own peer object with connection to shared PeerJS server
-      peer = new Peer(null, {
+      if (request.sessionIsActive) {
+        peer = new Peer(null, {
           debug: 2
-      });
-      initialize(peer);
-
-      console.log("Awaiting connection")
-
-      sendResponse({peerId: peer._id});
+        });
+        initialize(peer);
+      }
     }
   );
 
@@ -28,6 +41,7 @@
    */
    function initialize(peer) {
     peer.on('open', function (id) {
+      console.log('Host event - open');
       // Workaround for peer.reconnect deleting previous id
       if (peer.id === null) {
           console.log('Received null id from peer open');
@@ -36,36 +50,37 @@
           lastPeerId = peer.id;
       }
 
-      console.log('open', peer.id);
+      console.log('Sending peer id to popup', peer.id);
       chrome.runtime.sendMessage({peerId: peer.id});
     });
+
     peer.on('connection', function (c) {
+      console.log('Host event - connection', {'DataConnection': c});
+
         // Allow only a single connection
         if (conn && conn.open) {
             c.on('open', function() {
-                c.send("Already connected to another client");
-                setTimeout(function() { c.close(); }, 500);
+              console.log('Host event - Already connected to another client');
+              setTimeout(function() { c.close(); }, 500);
             });
             return;
         }
 
         conn = c;
-        console.log("Connected to: " + conn.peer);
         ready();
       });
-      peer.on('error', function (err) {
-          console.log(err);
-          alert('' + err);
+    peer.on('error', function (err) {
+        console.error('Host event - error', e);
       });
   };
 
   function ready() {
       conn.on('data', function (data) {
-          console.log("Data recieved: ", data);
+        console.log('Host event - data', {data});
       });
       conn.on('close', function () {
-          console.log("connection reset, awaiting connection")
-          conn = null;
+        console.log('Host event - close');
+        conn = null;
       });
   }
 })();
